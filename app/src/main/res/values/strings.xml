@@ -1,0 +1,49 @@
+<resources>
+  <string name="app_name">ElFeB</string>
+  <string name="location_service_label">ElFeB Location Service</string>
+  <string name="location_service_description">The Location Service takes care of making GPS Data available to new observations</string>
+
+  <string name="ok">OK</string>
+  <string name="cancel">Cancel</string>
+  <string name="wait">Wait</string>
+  <string name="unknown">Unknown</string>
+  <string name="continue_anyway">Continue anyway</string>
+
+
+  <string name="search">Search</string>
+  <string name="suspicion">Suspicion</string>
+  <string name="comment">Description</string>
+  <string name="suspicion_description">Short summary of this observation</string>
+  <string name="comment_description">What is noteworthy about this observation?</string>
+  <string name="tag">Tag</string>
+  <string name="tags">Tags</string>
+  <string name="location">Location</string>
+
+  <string name="location_coords">Lat: %f; Lon: %f</string>
+  <string name="observation_images">Images</string>
+  <string name="observation_image_title">Image: %s</string>
+  <string name="observation_image_open_hint">(Click to open)</string>
+  <string name="observation_audio">Audio</string>
+  <string name="observation_audio_title">Recording: %s</string>
+
+  <string name="save_observation">Save</string>
+  <string name="audio_play">Play now</string>
+
+  <string name="title_activity_entry">Entry</string>
+  <string name="title_activity_observation_details">Details</string>
+  <string name="tab_observation_details">Overview</string>
+  <string name="tab_observation_attachments">Pictures/Audio</string>
+  <string name="action_settings">Settings</string>
+  <string name="action_show_coords">Show coordinates</string>
+  <string name="action_add_tag">Add new Tag</string>
+  <string name="action_create_entry">Create a new entry</string>
+  <string name="action_create_entry_with_image">Create a new entry and attach an image right away</string>
+  <string name="action_create_entry_with_audio">Create a new entry and record an audio file right away</string>
+
+  <!-- events -->
+  <string name="location_found">Found location</string>
+  <string name="location_not_yet_found">Location has not been determined yet and will therefore not be added to the observation</string>
+  <string name="appwidget_text">EXAMPLE</string>
+  <string name="add_widget">Add widget</string>
+
+</resources>

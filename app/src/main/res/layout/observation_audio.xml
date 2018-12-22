@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <TextView
+    android:id="@+id/text_observation_audio_name"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="8dp"
+    android:layout_alignParentStart="true"
+    android:layout_alignParentTop="true"
+    android:text="@string/observation_audio_title"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"/>
+
+  <ImageButton
+    android:id="@+id/button_observation_audio_play"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="8dp"
+    android:layout_alignParentStart="true"
+    android:layout_below="@+id/text_observation_audio_name"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/text_observation_audio_name"
+    app:srcCompat="@drawable/ic_play_arrow_black"/>
+
+  <ImageButton
+    android:id="@+id/button_observation_audio_delete"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="64dp"
+    android:layout_alignParentEnd="true"
+    android:layout_below="@+id/text_observation_audio_name"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/text_observation_audio_name"
+    app:srcCompat="@drawable/ic_delete_black"/>
+
+  <TextView
+    android:id="@+id/text_observation_audio_play"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:layout_alignBaseline="@+id/button_observation_audio_play"
+    android:layout_toEndOf="@+id/button_observation_audio_play"
+    android:text="@string/audio_play"
+    app:layout_constraintBottom_toBottomOf="@+id/button_observation_audio_play"
+    app:layout_constraintStart_toEndOf="@+id/button_observation_audio_play"
+    app:layout_constraintTop_toTopOf="@+id/button_observation_audio_play"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
