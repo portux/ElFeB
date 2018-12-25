@@ -8,6 +8,7 @@ import android.provider.MediaStore;
 import android.provider.MediaStore.Audio.Media;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -169,9 +170,15 @@ public class ObservationDetailsActivity extends AppCompatActivity {
         // it is safe to get the coordinates here. The menu will only be shown if they are present.
         final double latitude = observation.getLocationLatitude();
         final double longitude = observation.getLocationLongitude();
-        String position = "pos:" + latitude + "," + longitude + "?q=" + latitude + "," + longitude;
+        String position = "geo:" + latitude + "," + longitude + "?q=" + latitude + "," + longitude;
         Intent showMapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(position));
-        startActivity(showMapIntent);
+
+        if (showMapIntent.resolveActivity(getPackageManager()) != null) {
+          startActivity(showMapIntent);
+        } else {
+          Toast noMapApp = Toast.makeText(this, R.string.no_maps_app, Toast.LENGTH_SHORT);
+          noMapApp.show();
+        }
       }
 
     }
