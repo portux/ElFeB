@@ -37,9 +37,9 @@ public class QuickEntryWidget extends AppWidgetProvider {
       remoteViews.setOnClickPendingIntent(R.id.widget_add_audio, entryWithAudioPendingIntent);
 
       remoteViews.setImageViewResource(R.id.widget_icon, R.mipmap.ic_launcher);
-      remoteViews.setImageViewResource(R.id.widget_add_entry, R.drawable.ic_add);
-      remoteViews.setImageViewResource(R.id.widget_add_photo, R.drawable.ic_add_photo);
-      remoteViews.setImageViewResource(R.id.widget_add_audio, R.drawable.ic_add_audio);
+      remoteViews.setImageViewResource(R.id.widget_add_entry, R.drawable.ic_add_circle_white_24dp);
+      remoteViews.setImageViewResource(R.id.widget_add_photo, R.drawable.ic_add_a_photo_white_24dp);
+      remoteViews.setImageViewResource(R.id.widget_add_audio, R.drawable.ic_mic_white_24dp);
 
       appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
     }

@@ -64,7 +64,8 @@
     app:layout_anchor="@+id/button_observation_updated"
     app:layout_anchorGravity="top|end"
     android:layout_gravity="top|end"
-    app:srcCompat="@drawable/ic_check"/>
+    app:srcCompat="@drawable/ic_check_white_24dp"/>
+
   <com.google.android.material.floatingactionbutton.FloatingActionButton
     android:id="@+id/button_observation_updated"
     android:layout_width="wrap_content"
@@ -74,7 +75,7 @@
     android:layout_gravity="end|bottom"
     android:clickable="true"
     android:focusable="true"
-    app:srcCompat="@drawable/ic_save"/>
+    app:srcCompat="@drawable/ic_save_white_24dp"/>
 
   <com.google.android.material.floatingactionbutton.FloatingActionButton
     android:id="@+id/button_observation_add_picture"
@@ -87,7 +88,8 @@
     app:layout_anchor="@+id/button_observation_add_audio"
     app:layout_anchorGravity="top|end"
     android:layout_gravity="top|end"
-    app:srcCompat="@drawable/ic_add_photo"/>
+    app:srcCompat="@drawable/ic_add_a_photo_white_24dp"/>
+
   <com.google.android.material.floatingactionbutton.FloatingActionButton
     android:id="@+id/button_observation_add_audio"
     android:layout_width="wrap_content"
@@ -97,7 +99,7 @@
     android:layout_gravity="end|bottom"
     android:clickable="true"
     android:focusable="true"
-    app:srcCompat="@drawable/ic_add_audio"/>
+    app:srcCompat="@drawable/ic_mic_white_24dp"/>
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

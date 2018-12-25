@@ -4,7 +4,7 @@
   android:layout_width="match_parent"
   android:layout_height="wrap_content"
   android:padding="@dimen/widget_margin"
-  >
+  android:background="#374012">
 
   <ImageView
     android:id="@+id/widget_icon"
@@ -12,29 +12,33 @@
     android:layout_height="wrap_content"
     android:layout_weight="1"
     app:srcCompat="@mipmap/ic_launcher"/>
-  <ImageButton
+
+  <ImageView
     android:id="@+id/widget_add_entry"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:layout_weight="1"
+    android:adjustViewBounds="true"
     android:contentDescription="@string/action_create_entry"
-    app:srcCompat="@drawable/ic_add"/>
+    android:cropToPadding="true"
+    android:scaleType="fitCenter"
+    android:src="@drawable/ic_add_circle_white_24dp"/>
 
-  <ImageButton
+  <ImageView
     android:id="@+id/widget_add_photo"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:layout_weight="1"
     android:contentDescription="@string/action_create_entry_with_image"
-    app:srcCompat="@drawable/ic_add_photo"/>
+    app:srcCompat="@drawable/ic_add_a_photo_white_24dp"/>
 
-  <ImageButton
+  <ImageView
     android:id="@+id/widget_add_audio"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:layout_weight="1"
     android:contentDescription="@string/action_create_entry_with_audio"
-    app:srcCompat="@drawable/ic_add_audio"
+    app:srcCompat="@drawable/ic_mic_white_24dp"
     />
 
 </LinearLayout>

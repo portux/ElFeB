@@ -4,7 +4,7 @@
   tools:context="de.portux.elfeb.ui.ObservationDetailsActivity">
   <item
     android:id="@+id/action_show_location"
-    android:icon="@drawable/ic_show_coords"
+    android:icon="@drawable/ic_map_white_24dp"
     android:title="@string/action_show_coords"
     app:showAsAction="ifRoom"/>
 </menu>

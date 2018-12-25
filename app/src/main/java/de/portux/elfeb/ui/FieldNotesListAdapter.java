@@ -87,9 +87,9 @@ public class FieldNotesListAdapter extends PagedListAdapter<Observation, Observa
       holder.observationSuspicionText.setText(current.getSuspicion());
 
       if (current.isDetermined()) {
-        holder.determinedImage.setImageResource(R.drawable.ic_determined);
+        holder.determinedImage.setImageResource(R.drawable.ic_check_circle_black_24dp);
       } else {
-        holder.determinedImage.setImageResource(R.drawable.ic_undetermined);
+        holder.determinedImage.setImageResource(R.drawable.ic_help_black_24dp);
       }
 
       holder.observationTimeText.setText(current.getTime().toString());

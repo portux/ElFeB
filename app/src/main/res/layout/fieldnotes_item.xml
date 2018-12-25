@@ -17,6 +17,7 @@
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintStart_toEndOf="@+id/image_determined"
     app:layout_constraintTop_toTopOf="parent"/>
+
   <ImageView
     android:id="@+id/image_determined"
     android:layout_width="wrap_content"
@@ -25,7 +26,8 @@
     app:layout_constraintBottom_toBottomOf="@+id/observation_suspicion"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="@+id/observation_suspicion"
-    app:srcCompat="@drawable/ic_undetermined"/>
+    app:srcCompat="@drawable/ic_help_black_24dp"/>
+
   <TextView
     android:id="@+id/text_observation_time"
     android:layout_width="wrap_content"

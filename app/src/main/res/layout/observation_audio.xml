@@ -27,7 +27,7 @@
     android:layout_below="@+id/text_observation_audio_name"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/text_observation_audio_name"
-    app:srcCompat="@drawable/ic_play_arrow_black"/>
+    app:srcCompat="@drawable/ic_play_arrow_black_24dp"/>
 
   <ImageButton
     android:id="@+id/button_observation_audio_delete"
@@ -39,7 +39,7 @@
     android:layout_below="@+id/text_observation_audio_name"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/text_observation_audio_name"
-    app:srcCompat="@drawable/ic_delete_black"/>
+    app:srcCompat="@drawable/ic_delete_black_24dp"/>
 
   <TextView
     android:id="@+id/text_observation_audio_play"
@@ -52,4 +52,5 @@
     app:layout_constraintBottom_toBottomOf="@+id/button_observation_audio_play"
     app:layout_constraintStart_toEndOf="@+id/button_observation_audio_play"
     app:layout_constraintTop_toTopOf="@+id/button_observation_audio_play"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
