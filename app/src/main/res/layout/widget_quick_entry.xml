@@ -22,7 +22,7 @@
     android:contentDescription="@string/action_create_entry"
     android:cropToPadding="true"
     android:scaleType="fitCenter"
-    android:src="@drawable/ic_add_circle_white_24dp"/>
+    android:src="@drawable/ic_add_circle_white_48dp"/>
 
   <ImageView
     android:id="@+id/widget_add_photo"
@@ -30,7 +30,7 @@
     android:layout_height="match_parent"
     android:layout_weight="1"
     android:contentDescription="@string/action_create_entry_with_image"
-    app:srcCompat="@drawable/ic_add_a_photo_white_24dp"/>
+    app:srcCompat="@drawable/ic_add_a_photo_white_48dp"/>
 
   <ImageView
     android:id="@+id/widget_add_audio"
@@ -38,7 +38,7 @@
     android:layout_height="match_parent"
     android:layout_weight="1"
     android:contentDescription="@string/action_create_entry_with_audio"
-    app:srcCompat="@drawable/ic_mic_white_24dp"
+    app:srcCompat="@drawable/ic_mic_white_48dp"
     />
 
 </LinearLayout>
