@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -46,6 +48,9 @@ public class EntryActivity extends AppCompatActivity {
   private static final String TAG = EntryActivity.class.getSimpleName();
   private static final int RQ_CAPTURE_IMAGE = 111;
   private static final int RQ_RECORD_AUDIO = 222;
+  private static final int RQ_CAPTURE_IMAGE_STORAGE_PERMISSION = 333;
+  private static final int RQ_RECORD_AUDIO_PERMISSIONS = 444;
+  private static final int RQ_LOCATION_PERMISSION = 555;
 
   private Intent mCallee;
   private AtomicBoolean mImmediateActionsProcessed = new AtomicBoolean(false);
@@ -121,9 +126,13 @@ public class EntryActivity extends AppCompatActivity {
     super.onStart();
 
     if (VERSION.SDK_INT >= 23) {
-      requestPermissions(new String[]{permission.ACCESS_FINE_LOCATION}, 0);
+      requestPermissions(new String[]{permission.ACCESS_FINE_LOCATION}, RQ_LOCATION_PERMISSION);
+      return;
     }
+    bindToLocationService();
+  }
 
+  private void bindToLocationService() {
     Intent locationService = new Intent(this, LocationService.class);
     bindService(locationService, mLocationServiceConnection, Context.BIND_AUTO_CREATE);
   }
@@ -175,6 +184,37 @@ public class EntryActivity extends AppCompatActivity {
 
   }
 
+  @Override
+  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+      @NonNull int[] grantResults) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+    switch (requestCode) {
+      case RQ_LOCATION_PERMISSION:
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+          bindToLocationService();
+        }
+        break;
+      case RQ_CAPTURE_IMAGE_STORAGE_PERMISSION:
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+          callCaptureImageApp();
+        }
+        break;
+      case RQ_RECORD_AUDIO_PERMISSIONS:
+        boolean allGranted = true;
+        for (int grantResult : grantResults) {
+          if (grantResult != PackageManager.PERMISSION_GRANTED) {
+            allGranted = false;
+          }
+        }
+        if (allGranted) {
+          callRecordAudioApp();
+        }
+        break;
+    }
+
+  }
+
   private Observation buildObservation() {
     Observation result = Observation
         .noticeNew(mSuspicion.getText().toString(), mDescription.getText().toString());
@@ -215,12 +255,15 @@ public class EntryActivity extends AppCompatActivity {
   }
 
   private void doCaptureImage() {
-    Intent captureImageIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
     if (VERSION.SDK_INT >= 23) {
-      requestPermissions(new String[]{permission.WRITE_EXTERNAL_STORAGE}, 0);
+      requestPermissions(new String[]{permission.WRITE_EXTERNAL_STORAGE}, RQ_CAPTURE_IMAGE_STORAGE_PERMISSION);
+      return;
     }
+    callCaptureImageApp();
+  }
 
+  private void callCaptureImageApp() {
+    Intent captureImageIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     if (captureImageIntent.resolveActivity(getPackageManager()) != null) {
       Uri imageFile = mImageStorageService.createImageFile();
       captureImageIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageFile);
@@ -230,13 +273,16 @@ public class EntryActivity extends AppCompatActivity {
   }
 
   private void doRecordAudio() {
-    Intent recordAudioIntent = new Intent(Media.RECORD_SOUND_ACTION);
-
     if (VERSION.SDK_INT >= 23) {
       requestPermissions(new String[]{permission.WRITE_EXTERNAL_STORAGE, permission.RECORD_AUDIO},
-          0);
+          RQ_RECORD_AUDIO_PERMISSIONS);
+      return;
     }
+    callRecordAudioApp();
+  }
 
+  private void callRecordAudioApp() {
+    Intent recordAudioIntent = new Intent(Media.RECORD_SOUND_ACTION);
     if (recordAudioIntent.resolveActivity(getPackageManager()) != null) {
       startActivityForResult(recordAudioIntent, RQ_RECORD_AUDIO);
     }

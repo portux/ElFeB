@@ -2,6 +2,7 @@ package de.portux.elfeb.ui;
 
 import android.Manifest.permission;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build.VERSION;
 import android.provider.MediaStore;
@@ -9,6 +10,7 @@ import android.provider.MediaStore.Audio.Media;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -39,11 +41,43 @@ import java.util.List;
 
 public class ObservationDetailsActivity extends AppCompatActivity {
 
+  /**
+   * A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the
+   * sections/tabs/pages.
+   */
+  public class SectionsPagerAdapter extends FragmentPagerAdapter {
+
+    public SectionsPagerAdapter(FragmentManager fm) {
+      super(fm);
+    }
+
+    @Override
+    public Fragment getItem(int position) {
+      switch (position) {
+        case PAGE_DETAILS:
+          mDetailsFragment = ObservationDetailsFragment.newInstance(mObservation);
+          return mDetailsFragment;
+        case PAGE_ATTACHMENTS:
+          mAttachmentsFragment = ObservationAttachmentsFragment.newInstance(mObservation);
+          return mAttachmentsFragment;
+        default:
+          throw new IllegalArgumentException("" + position);
+      }
+    }
+
+    @Override
+    public int getCount() {
+      return 2;
+    }
+  }
+
   private static final String TAG = ObservationDetailsActivity.class.getSimpleName();
   private static final int PAGE_DETAILS = 0;
   private static final int PAGE_ATTACHMENTS = 1;
   private static final int RQ_CAPTURE_IMAGE = 111;
   private static final int RQ_RECORD_AUDIO = 222;
+  private static final int RQ_CAPTURE_IMAGE_PERMISSIONS = 333;
+  private static final int RQ_RECORD_AUDIO_PERMISSIONS = 444;
 
   /**
    * The {@link androidx.viewpager.widget.PagerAdapter} that will provide fragments for each of the
@@ -224,38 +258,50 @@ public class ObservationDetailsActivity extends AppCompatActivity {
     }
   }
 
+  @Override
+  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+      @NonNull int[] grantResults) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+    switch (requestCode) {
+      case RQ_CAPTURE_IMAGE_PERMISSIONS:
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+          doCaptureImage();
+        }
+        break;
+      case RQ_RECORD_AUDIO_PERMISSIONS:
+        boolean allGranted = true;
+        for (int grantResult : grantResults) {
+          if (grantResult != PackageManager.PERMISSION_GRANTED) {
+            allGranted = false;
+          }
+        }
+        if (allGranted) {
+          doRecordAudio();
+        }
+        break;
+    }
+  }
+
   private void updateObservation(Observation observation) {
     mDetailsFragment.updateObservation(observation);
     finish();
   }
 
-  /**
-   * A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the
-   * sections/tabs/pages.
-   */
-  public class SectionsPagerAdapter extends FragmentPagerAdapter {
-
-    public SectionsPagerAdapter(FragmentManager fm) {
-      super(fm);
+  private void doCaptureImage() {
+    Intent captureImageIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    if (captureImageIntent.resolveActivity(getPackageManager()) != null) {
+      Uri imageFile = mImageStorageService.createImageFile();
+      captureImageIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageFile);
+      startActivityForResult(captureImageIntent, RQ_CAPTURE_IMAGE);
+      mImageAttachment = imageFile;
     }
+  }
 
-    @Override
-    public Fragment getItem(int position) {
-      switch (position) {
-        case PAGE_DETAILS:
-          mDetailsFragment = ObservationDetailsFragment.newInstance(mObservation);
-          return mDetailsFragment;
-        case PAGE_ATTACHMENTS:
-          mAttachmentsFragment = ObservationAttachmentsFragment.newInstance(mObservation);
-          return mAttachmentsFragment;
-        default:
-          throw new IllegalArgumentException("" + position);
-      }
-    }
-
-    @Override
-    public int getCount() {
-      return 2;
+  private void doRecordAudio() {
+    Intent recordAudioIntent = new Intent(Media.RECORD_SOUND_ACTION);
+    if (recordAudioIntent.resolveActivity(getPackageManager()) != null) {
+      startActivityForResult(recordAudioIntent, RQ_RECORD_AUDIO);
     }
   }
 
@@ -320,18 +366,11 @@ public class ObservationDetailsActivity extends AppCompatActivity {
     public void onChanged(Observation observation) {
       mObservation.removeObserver(this);
 
-      Intent captureImageIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
       if (VERSION.SDK_INT >= 23) {
-        requestPermissions(new String[]{permission.WRITE_EXTERNAL_STORAGE}, 0);
+        requestPermissions(new String[]{permission.WRITE_EXTERNAL_STORAGE}, RQ_CAPTURE_IMAGE_PERMISSIONS);
+        return;
       }
-
-      if (captureImageIntent.resolveActivity(getPackageManager()) != null) {
-        Uri imageFile = mImageStorageService.createImageFile();
-        captureImageIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageFile);
-        startActivityForResult(captureImageIntent, RQ_CAPTURE_IMAGE);
-        mImageAttachment = imageFile;
-      }
+      doCaptureImage();
     }
   };
 
@@ -347,15 +386,11 @@ public class ObservationDetailsActivity extends AppCompatActivity {
     public void onChanged(Observation observation) {
       mObservation.removeObserver(this);
 
-      Intent recordAudioIntent = new Intent(Media.RECORD_SOUND_ACTION);
-
       if (VERSION.SDK_INT >= 23) {
-        requestPermissions(new String[]{permission.WRITE_EXTERNAL_STORAGE, permission.RECORD_AUDIO}, 0);
+        requestPermissions(new String[]{permission.WRITE_EXTERNAL_STORAGE, permission.RECORD_AUDIO}, RQ_RECORD_AUDIO_PERMISSIONS);
+        return;
       }
-
-      if (recordAudioIntent.resolveActivity(getPackageManager()) != null) {
-        startActivityForResult(recordAudioIntent, RQ_RECORD_AUDIO);
-      }
+      doRecordAudio();
     }
   };
 
