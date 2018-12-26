@@ -53,4 +53,16 @@
     app:layout_constraintStart_toEndOf="@+id/button_observation_audio_play"
     app:layout_constraintTop_toTopOf="@+id/button_observation_audio_play"/>
 
+  <View
+    android:id="@+id/divider_audio_recordings"
+    android:layout_width="0dp"
+    android:layout_height="1dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:background="@color/secondaryDarkColor"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/button_observation_audio_play"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

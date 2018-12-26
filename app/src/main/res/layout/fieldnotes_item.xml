@@ -38,7 +38,7 @@
     android:layout_marginBottom="8dp"
     android:layout_marginStart="8dp"
     android:text="@string/observation_date"
-    app:layout_constraintBottom_toTopOf="@+id/divider"
+    app:layout_constraintBottom_toTopOf="@+id/divider_observation_items"
     app:layout_constraintStart_toEndOf="@+id/image_determined"
     app:layout_constraintTop_toBottomOf="@+id/observation_suspicion"/>
 
@@ -68,7 +68,7 @@
     app:layout_constraintTop_toTopOf="@+id/image_determined"
     app:srcCompat="@drawable/ic_camera_alt_white_24dp"/>
   <View
-    android:id="@+id/divider"
+    android:id="@+id/divider_observation_items"
     android:layout_width="0dp"
     android:layout_height="1dp"
     android:layout_marginBottom="8dp"
