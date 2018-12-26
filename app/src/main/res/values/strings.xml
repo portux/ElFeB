@@ -16,6 +16,8 @@
   <string name="tag">Tag</string>
   <string name="tags">Tags</string>
   <string name="location">Location</string>
+  <string name="observation_date">Date</string>
+  <string name="observation_date_format">MM-dd-yyyy HH:mm</string>
 
   <string name="location_coords">Lat: %f; Lon: %f</string>
   <string name="observation_images">Images</string>

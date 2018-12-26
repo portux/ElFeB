@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/layout_fieldnotes_item"
   android:layout_width="match_parent"
   android:layout_height="wrap_content">
 
@@ -11,19 +12,20 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
-    android:layout_marginBottom="8dp"
     android:layout_marginStart="8dp"
     android:text="@string/suspicion"
-    app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintStart_toEndOf="@+id/image_determined"
     app:layout_constraintTop_toTopOf="parent"/>
 
   <ImageView
     android:id="@+id/image_determined"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_height="0dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
     android:layout_marginStart="8dp"
-    app:layout_constraintBottom_toBottomOf="@+id/observation_suspicion"
+    android:adjustViewBounds="true"
+    app:layout_constraintBottom_toBottomOf="@+id/text_observation_time"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="@+id/observation_suspicion"
     app:srcCompat="@drawable/ic_help_black_24dp"/>
@@ -32,10 +34,49 @@
     android:id="@+id/text_observation_time"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
     android:layout_marginBottom="8dp"
     android:layout_marginStart="8dp"
-    android:text="TextView"
+    android:text="@string/observation_date"
+    app:layout_constraintBottom_toTopOf="@+id/divider"
+    app:layout_constraintStart_toEndOf="@+id/image_determined"
+    app:layout_constraintTop_toBottomOf="@+id/observation_suspicion"/>
+
+  <ImageView
+    android:id="@+id/image_recording_attached"
+    android:layout_width="wrap_content"
+    android:layout_height="0dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    android:layout_marginEnd="8dp"
+    android:adjustViewBounds="true"
+    android:background="@color/secondaryColor"
+    app:layout_constraintBottom_toBottomOf="@+id/text_observation_time"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toTopOf="@+id/observation_suspicion"
+    app:srcCompat="@drawable/ic_mic_white_24dp"/>
+
+  <ImageView
+    android:id="@+id/image_picture_attached"
+    android:layout_width="wrap_content"
+    android:layout_height="0dp"
+    android:layout_marginEnd="8dp"
+    android:adjustViewBounds="true"
+    android:background="@color/secondaryColor"
+    app:layout_constraintBottom_toBottomOf="@+id/image_determined"
+    app:layout_constraintEnd_toStartOf="@+id/image_recording_attached"
+    app:layout_constraintTop_toTopOf="@+id/image_determined"
+    app:srcCompat="@drawable/ic_camera_alt_white_24dp"/>
+  <View
+    android:id="@+id/divider"
+    android:layout_width="0dp"
+    android:layout_height="1dp"
+    android:layout_marginBottom="8dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:background="@color/primaryTextColor"
     app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintStart_toEndOf="@+id/observation_suspicion"/>
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

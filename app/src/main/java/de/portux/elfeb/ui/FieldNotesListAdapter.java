@@ -15,6 +15,7 @@ import android.widget.TextView;
 import de.portux.elfeb.R;
 import de.portux.elfeb.model.Observation;
 import de.portux.elfeb.ui.FieldNotesListAdapter.ObservationViewHolder;
+import java.text.SimpleDateFormat;
 
 public class FieldNotesListAdapter extends PagedListAdapter<Observation, ObservationViewHolder> {
 
@@ -35,6 +36,8 @@ public class FieldNotesListAdapter extends PagedListAdapter<Observation, Observa
     TextView observationSuspicionText;
     ImageView determinedImage;
     TextView observationTimeText;
+    ImageView pictureAttachedImage;
+    ImageView recordingAttachedImage;
 
     private Observation displayedObservation;
 
@@ -43,6 +46,8 @@ public class FieldNotesListAdapter extends PagedListAdapter<Observation, Observa
       observationSuspicionText = itemView.findViewById(R.id.observation_suspicion);
       determinedImage = itemView.findViewById(R.id.image_determined);
       observationTimeText = itemView.findViewById(R.id.text_observation_time);
+      pictureAttachedImage = itemView.findViewById(R.id.image_picture_attached);
+      recordingAttachedImage = itemView.findViewById(R.id.image_recording_attached);
     }
 
     void updateDisplayedObservation(Observation observation) {
@@ -52,6 +57,7 @@ public class FieldNotesListAdapter extends PagedListAdapter<Observation, Observa
   }
 
   private final LayoutInflater mInflater;
+  private final SimpleDateFormat mDateFormatter;
   private final View.OnClickListener showObservation;
 
   private PagedList<Observation> mObservations;
@@ -69,6 +75,7 @@ public class FieldNotesListAdapter extends PagedListAdapter<Observation, Observa
       ctx.startActivity(showObservationIntent);
     };
 
+    this.mDateFormatter = new SimpleDateFormat(ctx.getString(R.string.observation_date_format), ctx.getResources().getConfiguration().locale);
   }
 
   @NonNull
@@ -92,7 +99,19 @@ public class FieldNotesListAdapter extends PagedListAdapter<Observation, Observa
         holder.determinedImage.setImageResource(R.drawable.ic_help_black_24dp);
       }
 
-      holder.observationTimeText.setText(current.getTime().toString());
+      holder.observationTimeText.setText(mDateFormatter.format(current.getTime()));
+
+      if (current.isImageAttached()) {
+        holder.pictureAttachedImage.setVisibility(View.VISIBLE);
+      } else {
+        holder.pictureAttachedImage.setVisibility(View.GONE);
+      }
+
+      if (current.isRecordingAttached()) {
+        holder.recordingAttachedImage.setVisibility(View.VISIBLE);
+      } else {
+        holder.recordingAttachedImage.setVisibility(View.GONE);
+      }
 
       holder.updateDisplayedObservation(current);
     } else {
