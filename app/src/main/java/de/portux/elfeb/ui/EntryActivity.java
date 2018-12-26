@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import de.portux.elfeb.R;
 import de.portux.elfeb.model.Attachment;
+import de.portux.elfeb.model.GPSPosition;
 import de.portux.elfeb.model.Observation;
 import de.portux.elfeb.model.Tag;
 import de.portux.elfeb.services.LocationService;
@@ -265,7 +266,10 @@ public class EntryActivity extends AppCompatActivity {
   private void callCaptureImageApp() {
     Intent captureImageIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     if (captureImageIntent.resolveActivity(getPackageManager()) != null) {
-      Uri imageFile = mImageStorageService.createImageFile();
+      GPSPosition currentPosition = mLocationServiceBound //
+          ? mLocationService.getCurrentLocationAsGPSPosition() //
+          : null;
+      Uri imageFile = mImageStorageService.createImageFile(currentPosition);
       captureImageIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageFile);
       startActivityForResult(captureImageIntent, RQ_CAPTURE_IMAGE);
       mImageAttachment = imageFile;
