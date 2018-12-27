@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.widget.RemoteViews;
 import de.portux.elfeb.R;
 import de.portux.elfeb.ui.EntryActivity;
+import de.portux.elfeb.ui.OverviewActivity;
 
 /**
  * Implementation of App Widget functionality.
@@ -18,6 +19,7 @@ public class QuickEntryWidget extends AppWidgetProvider {
   private static final int RQ_NEW_ENTRY = 111;
   private static final int RQ_IMAGE_ENTRY = 222;
   private static final int RQ_AUDIO_ENTRY = 333;
+  private static final int RQ_OVERVIEW = 444;
 
   @Override
   public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -76,6 +78,8 @@ public class QuickEntryWidget extends AppWidgetProvider {
     PendingIntent entryWithImagePendingIntent = PendingIntent.getActivity(context, RQ_IMAGE_ENTRY, entryWithImage, PendingIntent.FLAG_UPDATE_CURRENT);
     Intent simpleEntry = new Intent(context, EntryActivity.class);
     PendingIntent simpleEntryPendingIntent = PendingIntent.getActivity(context, RQ_NEW_ENTRY, simpleEntry, PendingIntent.FLAG_UPDATE_CURRENT);
+    Intent showOverview = new Intent(context, OverviewActivity.class);
+    PendingIntent showOverviewPendingIntent = PendingIntent.getActivity(context, RQ_OVERVIEW, showOverview, PendingIntent.FLAG_UPDATE_CURRENT);
 
     switch (rows) {
       case 4:   // audio + image + default + icon
@@ -94,9 +98,11 @@ public class QuickEntryWidget extends AppWidgetProvider {
         // fall through
       case 1:   // icon only
         remoteViews.setImageViewResource(R.id.widget_icon, R.mipmap.ic_launcher);
+        remoteViews.setOnClickPendingIntent(R.id.widget_icon, showOverviewPendingIntent);
         break;
       default:  // more than 4 rows => everything
         remoteViews.setImageViewResource(R.id.widget_icon, R.mipmap.ic_launcher);
+        remoteViews.setOnClickPendingIntent(R.id.widget_icon, showOverviewPendingIntent);
         remoteViews.setOnClickPendingIntent(R.id.widget_add_entry, simpleEntryPendingIntent);
         remoteViews.setImageViewResource(R.id.widget_add_photo, R.drawable.ic_add_a_photo_white_48dp);
         remoteViews.setOnClickPendingIntent(R.id.widget_add_photo, entryWithImagePendingIntent);
@@ -106,7 +112,6 @@ public class QuickEntryWidget extends AppWidgetProvider {
     }
     return remoteViews;
   }
-
 
   private int determineNumberOfCells(int size) {
     // see : https://developer.android.com/guide/practices/ui_guidelines/widget_design#anatomy_determining_size
