@@ -24,7 +24,7 @@ interface ObservationDao {
 
   String TAG = ObservationDao.class.getSimpleName();
 
-  @Query("SELECT * FROM observations ORDER BY time")
+  @Query("SELECT * FROM observations ORDER BY time DESC")
   DataSource.Factory<Integer, Observation> getAllObservations();
 
   @Query("SELECT * FROM attachments WHERE observation_time = :observationTime AND observation_suspicion = :observationSuspicion")
