@@ -31,8 +31,6 @@ import javax.annotation.Nonnull;
 @Entity(tableName = "observations", primaryKeys = {"time", "suspicion"})
 public class Observation implements Serializable {
 
-  // TODO store location
-
   @NonNull
   @ColumnInfo(name = "time")
   private Date mTime;
