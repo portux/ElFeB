@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">ElFeB</string>
+  <string name="location_service_label">ElFeB Ortungsdienst</string>
+  <string name="location_service_description">Der Ortungsdienst fügt GPS-Informationen zu neuen Einträgen hinzu</string>
+  <string name="ok">OK</string>
+  <string name="cancel">Abbrechen</string>
+  <string name="wait">Warten</string>
+  <string name="unknown">Unbekannt</string>
+  <string name="continue_anyway">Trotzdem fortfahren</string>
+  <string name="suspicion">Verdacht</string>
+  <string name="comment">Beschreibung</string>
+  <string name="suspicion_description">Was könnte es sein?</string>
+  <string name="comment_description">Warum ist diese Beobachtung interessant?</string>
+  <string name="tag">Tag</string>
+  <string name="tags">Tags</string>
+  <string name="location">Ort</string>
+  <string name="observation_date">Datum</string>
+  <string name="observation_date_format">dd.MM.yyyy HH:mm</string>
+  <string name="location_coords">Lat: %f, Lon: %f</string>
+  <string name="observation_images">Bilder</string>
+  <string name="observation_image_title">Bild: %s</string>
+  <string name="observation_image_open_hint">(Anklicken zum Öffnen)</string>
+  <string name="observation_audio">Aufnahmen</string>
+  <string name="observation_audio_title">Aufnahme: %s</string>
+  <string name="save_observation">Speichern</string>
+  <string name="audio_play">Wiedergegen</string>
+  <string name="title_activity_entry">Eintrag</string>
+  <string name="title_activity_observation_details">Details</string>
+  <string name="tab_observation_details">Übersicht</string>
+  <string name="tab_observation_attachments">Bilder/Aufnahmen</string>
+  <string name="action_show_coords">Koordinaten anzeigen</string>
+  <string name="action_add_tag">Tag erstellen</string>
+  <string name="action_create_entry">Eintrag hinzufügen</string>
+  <string name="action_create_entry_with_image">Eintrag mit Bild hinzufügen</string>
+  <string name="action_create_entry_with_audio">Eintrag mit Tonaufnahme erstellen</string>
+  <string name="location_found">GPS Position gefunden</string>
+  <string name="location_not_yet_found">Die GPS Position wurde noch nicht bestimmt und wird deshalb nicht zum Eintrag hinzugefügt</string>
+  <string name="no_maps_app">Es wurde keine App gefunden, die die Position anzeigen kann!</string>
+</resources>

@@ -1,5 +1,5 @@
 <resources>
-  <string name="app_name">ElFeB</string>
+  <string name="app_name" translatable="false">ElFeB</string>
   <string name="location_service_label">ElFeB Location Service</string>
   <string name="location_service_description">The Location Service takes care of making GPS Data available to new observations</string>
 
