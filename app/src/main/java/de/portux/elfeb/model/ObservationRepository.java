@@ -1,15 +1,19 @@
 package de.portux.elfeb.model;
 
 import android.app.Application;
+import android.util.Pair;
 import androidx.lifecycle.LiveData;
 import androidx.paging.DataSource;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
 import android.os.AsyncTask;
+import de.portux.elfeb.model.Attachment.AttachmentType;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class ObservationRepository implements FieldNotes {
 
@@ -70,11 +74,19 @@ public class ObservationRepository implements FieldNotes {
   @Override
   public void addAttachment(Attachment attachment) {
     new addAttachmentAsyncTask(mObservationDao).execute(attachment);
+    switch (attachment.getType()) {
+      case IMAGE:
+        new updateImagesAttachedAsyncTask(mObservationDao, attachment.getObservationTime(), attachment.getObservationSuspicion()).execute(true);
+        break;
+      case AUDIO:
+        new updateRecordingsAttachedAsyncTask(mObservationDao, attachment.getObservationTime(), attachment.getObservationSuspicion()).execute(true);
+        break;
+    }
   }
 
   @Override
   public void removeAttachment(Attachment attachment) {
-    new deleteAttachmentAsyncTask(mObservationDao).execute(attachment);
+    new deleteAttachmentsAndUpdateFlagsAsyncTask(mObservationDao).execute(attachment);
   }
 
   @Override
@@ -138,16 +150,54 @@ public class ObservationRepository implements FieldNotes {
     }
   }
 
-  private static class deleteAttachmentAsyncTask extends AsyncTask<Attachment, Void, Void> {
+  private static class deleteAttachmentsAndUpdateFlagsAsyncTask extends  AsyncTask<Attachment, Void, Void> {
     private ObservationDao mAsyncTaskDao;
 
-    deleteAttachmentAsyncTask(ObservationDao asyncTaskDao) {
-      this.mAsyncTaskDao = asyncTaskDao;
+    deleteAttachmentsAndUpdateFlagsAsyncTask(ObservationDao dao) {
+      mAsyncTaskDao = dao;
     }
 
     @Override
     protected Void doInBackground(Attachment... attachments) {
+      Map<Pair<Date, String>, Integer> remainingImageAttachments = new HashMap<>();
+      Map<Pair<Date, String>, Integer> remainingAudioAttachments = new HashMap<>();
+
+      // calculate how many attachments of each type are currently linked to the observations
+      for (Attachment attachment : attachments) {
+        Pair<Date, String> currentKey = Pair.create(attachment.getObservationTime(), attachment.getObservationSuspicion());
+
+        switch (attachment.getType()) {
+          case IMAGE:
+            Integer currentImageEntry = remainingImageAttachments.get(currentKey);
+            int currentImageCount = currentImageEntry != null //
+                ? currentImageEntry //
+                : mAsyncTaskDao.countAttachmentsForObservation(attachment.getObservationTime(), attachment.getObservationSuspicion(), AttachmentType.IMAGE.name());
+            remainingImageAttachments.put(currentKey, --currentImageCount);
+            break;
+          case AUDIO:
+            Integer currentAudioEntry = remainingAudioAttachments.get(currentKey);
+            int currentAudioCount = currentAudioEntry != null //
+                ? currentAudioEntry //
+                : mAsyncTaskDao.countAttachmentsForObservation(attachment.getObservationTime(), attachment.getObservationSuspicion(), AttachmentType.AUDIO.name());
+            remainingAudioAttachments.put(currentKey, --currentAudioCount);
+            break;
+        }
+      }
+
+      // delete the given attachments
       mAsyncTaskDao.deleteAttachments(attachments);
+
+      // update the imagesAttached and recordingsAttached flags in the corresponding observation
+      for (Entry<Pair<Date, String>, Integer> attachmentEntries : remainingImageAttachments.entrySet()) {
+        if (attachmentEntries.getValue() == 0) {
+          mAsyncTaskDao.updateObservationImagesAttached(attachmentEntries.getKey().first, attachmentEntries.getKey().second, false);
+        }
+      }
+      for (Entry<Pair<Date, String>, Integer> attachmentEntries : remainingAudioAttachments.entrySet()) {
+        if (attachmentEntries.getValue() == 0) {
+          mAsyncTaskDao.updateObservationRecordingsAttached(attachmentEntries.getKey().first, attachmentEntries.getKey().second, false);
+        }
+      }
       return null;
     }
   }
@@ -184,4 +234,42 @@ public class ObservationRepository implements FieldNotes {
       return null;
     }
   }
+
+  private static class updateImagesAttachedAsyncTask extends AsyncTask<Boolean, Void, Void> {
+    private ObservationDao mAsyncTaskDao;
+    private Date mObservationTime;
+    private String mObservationSuspicion;
+
+    updateImagesAttachedAsyncTask(ObservationDao dao, Date observationTime, String observationSuspicion) {
+      this.mAsyncTaskDao = dao;
+      this.mObservationTime = observationTime;
+      this.mObservationSuspicion = observationSuspicion;
+    }
+
+    @Override
+    protected Void doInBackground(Boolean... booleans) {
+      mAsyncTaskDao.updateObservationImagesAttached(mObservationTime, mObservationSuspicion, booleans[0]);
+      return null;
+    }
+  }
+
+  private static class updateRecordingsAttachedAsyncTask extends AsyncTask<Boolean, Void, Void> {
+    private ObservationDao mAsyncTaskDao;
+    private Date mObservationTime;
+    private String mObservationSuspicion;
+
+    updateRecordingsAttachedAsyncTask(ObservationDao dao, Date observationTime, String observationSuspicion) {
+      this.mAsyncTaskDao = dao;
+      this.mObservationTime = observationTime;
+      this.mObservationSuspicion = observationSuspicion;
+    }
+
+    @Override
+    protected Void doInBackground(Boolean... booleans) {
+      mAsyncTaskDao.updateObservationRecordingsAttached(mObservationTime, mObservationSuspicion,
+          booleans[0]);
+      return null;
+    }
+  }
+
 }

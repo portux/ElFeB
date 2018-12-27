@@ -38,6 +38,12 @@ interface ObservationDao {
   @Query("SELECT * FROM attachments WHERE observation_time = :observationTime AND observation_suspicion = :observationSuspicion")
   List<Attachment> getRawAttachmentsForObservation(Date observationTime, String observationSuspicion);
 
+  @Query("SELECT COUNT(*) FROM attachments WHERE observation_time = :observationTime AND observation_suspicion = :observationSuspicion")
+  int countAttachmentsForObservation(Date observationTime, String observationSuspicion);
+
+  @Query("SELECT COUNT(*) FROM attachments WHERE observation_time = :observationTime AND observation_suspicion = :observationSuspicion AND type = :attachmentType")
+  int countAttachmentsForObservation(Date observationTime, String observationSuspicion, String attachmentType);
+
   @Query("SELECT tag FROM observation_tags WHERE observation_time = :observationTime AND observation_suspicion = :observationSuspicion")
   LiveData<List<Tag>> getTagsForObservation(Date observationTime, String observationSuspicion);
 
@@ -59,6 +65,12 @@ interface ObservationDao {
 
   @Query("UPDATE observations SET suspicion = :newSuspicion WHERE time = :observationTime AND suspicion = :oldSuspicion")
   void updateObservationSuspicion(Date observationTime, String oldSuspicion, String newSuspicion);
+
+  @Query("UPDATE observations SET images_attached = :imagesAttached WHERE time = :observationTime AND suspicion = :observationSuspicion")
+  void updateObservationImagesAttached(Date observationTime, String observationSuspicion, boolean imagesAttached);
+
+  @Query("UPDATE observations SET recordings_attached = :recordingsAttached WHERE time = :observationTime AND suspicion = :observationSuspicion")
+  void updateObservationRecordingsAttached(Date observationTime, String observationSuspicion, boolean recordingsAttached);
 
   @Delete
   void deleteObservationTags(ObservationTag... observationTags);
