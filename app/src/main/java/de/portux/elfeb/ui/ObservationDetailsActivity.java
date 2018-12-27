@@ -12,6 +12,7 @@ import android.view.View.OnClickListener;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
@@ -30,6 +31,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import de.portux.elfeb.BuildConfig;
 import de.portux.elfeb.R;
 import de.portux.elfeb.model.Attachment;
 import de.portux.elfeb.model.Observation;
@@ -107,7 +109,7 @@ public class ObservationDetailsActivity extends AppCompatActivity {
 
   private MutableLiveData<Observation> mObservation = new MutableLiveData<>();
 
-  private Uri mImageAttachment;
+  private File mImageAttachment;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -230,8 +232,7 @@ public class ObservationDetailsActivity extends AppCompatActivity {
           // at this point it is save to call getValue() as the capture image activity will only
           // be callable if the observation is present
           final Observation observation = mObservation.getValue();
-          File imageFile = mImageStorageService.convertUriToFile(this, mImageAttachment);
-          Attachment imageAttachment = Attachment.forImage(imageFile, observation);
+          Attachment imageAttachment = Attachment.forImage(mImageAttachment, observation);
           mObservationViewModel.insertAttachment(imageAttachment);
           if (mAttachmentsFragment != null) {
             mAttachmentsFragment.displayImageAttachment(imageAttachment);
@@ -291,8 +292,9 @@ public class ObservationDetailsActivity extends AppCompatActivity {
   private void doCaptureImage() {
     Intent captureImageIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     if (captureImageIntent.resolveActivity(getPackageManager()) != null) {
-      Uri imageFile = mImageStorageService.createImageFile();
-      captureImageIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageFile);
+      File imageFile = mImageStorageService.createImageFile();
+      Uri imageUri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", imageFile);
+      captureImageIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
       startActivityForResult(captureImageIntent, RQ_CAPTURE_IMAGE);
       mImageAttachment = imageFile;
     }

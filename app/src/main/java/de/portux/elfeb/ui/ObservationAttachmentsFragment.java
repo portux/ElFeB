@@ -13,15 +13,18 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.LayoutManager;
+import de.portux.elfeb.BuildConfig;
 import de.portux.elfeb.R;
 import de.portux.elfeb.model.Attachment;
 import de.portux.elfeb.model.Observation;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,17 +53,7 @@ public class ObservationAttachmentsFragment extends Fragment {
     private Observation mObservation;
     private List<Attachment> mImages;
 
-    private final OnClickListener openImageListener = new OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        Attachment image = (Attachment) v.getTag(R.id.tag_image);
-        Intent showImageIntent = new Intent(Intent.ACTION_VIEW);
-        showImageIntent.setDataAndType(Uri.fromFile(image.getPath()), "image/*");
-        if (showImageIntent.resolveActivity(mFragment.getActivity().getPackageManager()) != null) {
-          mFragment.startActivity(showImageIntent);
-        }
-      }
-    };
+    private final OnClickListener openImageListener;
 
     private final OnClickListener imageDeletionListener = new OnClickListener() {
       @Override
@@ -77,6 +70,19 @@ public class ObservationAttachmentsFragment extends Fragment {
       this.mFragment = fragment;
       this.mViewModel = ViewModelProviders.of(fragment).get(ObservationViewModel.class);
       this.mObservation = mObservation;
+
+      this.openImageListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          Attachment image = (Attachment) v.getTag(R.id.tag_image);
+          Intent showImageIntent = new Intent(Intent.ACTION_VIEW);
+          showImageIntent.setDataAndType(FileProvider.getUriForFile(fragment.getContext(), BuildConfig.APPLICATION_ID +".provider", image.getPath()), "image/*");
+          showImageIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+          if (showImageIntent.resolveActivity(mFragment.getActivity().getPackageManager()) != null) {
+            mFragment.startActivity(showImageIntent);
+          }
+        }
+      };
     }
 
     @NonNull

@@ -23,11 +23,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import de.portux.elfeb.BuildConfig;
 import de.portux.elfeb.R;
 import de.portux.elfeb.model.Attachment;
 import de.portux.elfeb.model.GPSPosition;
@@ -64,7 +66,7 @@ public class EntryActivity extends AppCompatActivity {
   private TagViewModel mTagViewModel;
   private ObservationViewModel mObservationViewModel;
 
-  private Uri mImageAttachment;
+  private File mImageAttachment;
   private Uri mAudioAttachment;
 
   private EditText mSuspicion;
@@ -231,8 +233,7 @@ public class EntryActivity extends AppCompatActivity {
     }
 
     if (mImageAttachment != null) {
-      File imageFile = mImageStorageService.convertUriToFile(this, mImageAttachment);
-      result.attach(Attachment.forImage(imageFile, result));
+      result.attach(Attachment.forImage(mImageAttachment, result));
     }
 
     if (mAudioAttachment != null) {
@@ -269,8 +270,9 @@ public class EntryActivity extends AppCompatActivity {
       GPSPosition currentPosition = mLocationServiceBound //
           ? mLocationService.getCurrentLocationAsGPSPosition() //
           : null;
-      Uri imageFile = mImageStorageService.createImageFile(currentPosition);
-      captureImageIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageFile);
+      File imageFile = mImageStorageService.createImageFile(currentPosition);
+      Uri imageUri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", imageFile);
+      captureImageIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
       startActivityForResult(captureImageIntent, RQ_CAPTURE_IMAGE);
       mImageAttachment = imageFile;
     }
