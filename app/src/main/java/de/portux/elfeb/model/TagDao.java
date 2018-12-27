@@ -10,7 +10,7 @@ import java.util.List;
 @Dao
 interface TagDao {
 
-  @Query("SELECT * FROM tags ORDER BY tag")
+  @Query("SELECT * FROM tags ORDER BY tag COLLATE 'NOCASE' ASC")
   LiveData<List<Tag>> getAllTags();
 
   @Insert(onConflict = OnConflictStrategy.IGNORE)
