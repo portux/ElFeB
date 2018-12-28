@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Build.VERSION;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio.Media;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Toast;
@@ -304,6 +305,10 @@ public class ObservationDetailsActivity extends AppCompatActivity {
     Intent recordAudioIntent = new Intent(Media.RECORD_SOUND_ACTION);
     if (recordAudioIntent.resolveActivity(getPackageManager()) != null) {
       startActivityForResult(recordAudioIntent, RQ_RECORD_AUDIO);
+    } else {
+      Log.e(TAG, "No audio recorder found");
+      mAddAudio.hide();
+      Toast.makeText(this, R.string.no_recording_app, Toast.LENGTH_SHORT).show();
     }
   }
 

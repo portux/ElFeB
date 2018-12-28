@@ -37,4 +37,5 @@
   <string name="location_found">GPS Position gefunden</string>
   <string name="location_not_yet_found">Die GPS Position wurde noch nicht bestimmt und wird deshalb nicht zum Eintrag hinzugefügt</string>
   <string name="no_maps_app">Es wurde keine App gefunden, die die Position anzeigen kann!</string>
+  <string name="no_recording_app">Es wurde keine Aufnahme-App gefunden!</string>
 </resources>

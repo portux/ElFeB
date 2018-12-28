@@ -43,5 +43,6 @@
   <string name="location_found">Found location</string>
   <string name="location_not_yet_found">Location has not been determined yet and will therefore not be added to the observation</string>
   <string name="no_maps_app">No App which could show the position was found!</string>
+  <string name="no_recording_app">No recorder App was found!</string>
 
 </resources>
