@@ -64,7 +64,6 @@ public class EntryActivity extends AppCompatActivity {
   private StorageService.Images mImageStorageService;
   private StorageService.Audio mAudioStorageService;
 
-  private TagViewModel mTagViewModel;
   private ObservationViewModel mObservationViewModel;
 
   private File mImageAttachment;
@@ -74,9 +73,7 @@ public class EntryActivity extends AppCompatActivity {
   private EditText mDescription;
 
   private Button mSaveObservation;
-  private RecyclerView mTagSelectionView;
   private TagSelectionAdapter mTagSelectionAdapter;
-  private RecyclerView.LayoutManager mTagSelectionLayoutManager;
   private FloatingActionButton mCaptureImageButton;
   private FloatingActionButton mRecordAudioButton;
 
@@ -87,25 +84,30 @@ public class EntryActivity extends AppCompatActivity {
 
     mCallee = getIntent();
 
-    if (mCallee.getStringExtra(CALLEE) != null //
-        && mCallee.getStringExtra(CALLEE).equals(OverviewActivity.TAG) //
-        && getActionBar() != null) {
-      getActionBar().setDisplayHomeAsUpEnabled(true);
+    // set-up Up-Navigation is necessary
+    if (mCallee.getStringExtra(INTENT_EXTRA_CALLEE) != null //
+        && mCallee.getStringExtra(INTENT_EXTRA_CALLEE).equals(OverviewActivity.TAG) //
+        && getSupportActionBar() != null) {
+      getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    } else if (getSupportActionBar() != null) {
+      getSupportActionBar().setDisplayHomeAsUpEnabled(false);
     }
+
+    // set-up all controls
 
     mSuspicion = findViewById(R.id.edit_suspicion);
     mDescription = findViewById(R.id.edit_comment);
 
-    mTagSelectionView = findViewById(R.id.recycler_tag_selection);
-    mTagSelectionView.setHasFixedSize(true);
+    final RecyclerView tagSelectionView = findViewById(R.id.recycler_tag_selection);
+    tagSelectionView.setHasFixedSize(true);
 
-    mTagSelectionLayoutManager = new LinearLayoutManager(this);
-    mTagSelectionView.setLayoutManager(mTagSelectionLayoutManager);
+    final RecyclerView.LayoutManager tagSelectionLayoutManager = new LinearLayoutManager(this);
+    tagSelectionView.setLayoutManager(tagSelectionLayoutManager);
 
     mTagSelectionAdapter = new TagSelectionAdapter();
-    mTagViewModel = ViewModelProviders.of(this).get(TagViewModel.class);
-    mTagViewModel.getTags().observe(this, new SelectionAdapterTagInitializer());
-    mTagSelectionView.setAdapter(mTagSelectionAdapter);
+    final TagViewModel tagViewModel = ViewModelProviders.of(this).get(TagViewModel.class);
+    tagViewModel.getTags().observe(this, new SelectionAdapterTagInitializer());
+    tagSelectionView.setAdapter(mTagSelectionAdapter);
 
     mSaveObservation = findViewById(R.id.button_save_observation);
     mSaveObservation.setOnClickListener(new SaveNewObservationClickListener());

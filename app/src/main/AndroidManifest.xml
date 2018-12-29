@@ -30,6 +30,9 @@
     <activity
       android:label="@string/title_activity_entry"
       android:name=".ui.EntryActivity">
+      <meta-data
+        android:name="android.support.PARENT_ACTIVITY"
+        android:value="de.portux.elfeb.ui.OverviewActivity" />
     </activity>
     <activity
       android:label="@string/title_activity_observation_details"
