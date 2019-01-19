@@ -1,5 +1,7 @@
 package de.portux.elfeb.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -27,11 +29,27 @@ import java.util.Objects;
         @Index({"observation_time", "observation_suspicion"})
     }
 )
-public class Attachment implements Serializable {
+public class Attachment implements Parcelable {
 
   public enum AttachmentType {
     IMAGE, AUDIO
   }
+
+  public static final Creator<Attachment> CREATOR = new Creator<Attachment>() {
+    @Override
+    public Attachment createFromParcel(Parcel in) {
+      final Date observationTime = new Date(in.readLong());
+      final String observationSuspicion = in.readString();
+      final File path = new File(in.readString());
+      final AttachmentType attachmentType = AttachmentType.values()[in.readInt()];
+      return new Attachment(observationTime, observationSuspicion, path, attachmentType);
+    }
+
+    @Override
+    public Attachment[] newArray(int size) {
+      return new Attachment[size];
+    }
+  };
 
   @NonNull
   @ColumnInfo(name = "observation_time")
@@ -93,6 +111,19 @@ public class Attachment implements Serializable {
   @NonNull
   protected String getObservationSuspicion() {
     return mObservationSuspicion;
+  }
+
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    dest.writeString(mObservationSuspicion);
+    dest.writeLong(mObservationTime.getTime());
+    dest.writeString(mPath.getPath());
+    dest.writeInt(mType.ordinal());
   }
 
   @Override

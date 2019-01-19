@@ -1,5 +1,7 @@
 package de.portux.elfeb.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
@@ -26,7 +28,19 @@ import java.util.Objects;
  * @author Rico Bergmann
  */
 @Entity(tableName = "tags")
-public class Tag implements Serializable {
+public class Tag implements Parcelable {
+
+  public static final Creator<Tag> CREATOR = new Creator<Tag>() {
+    @Override
+    public Tag createFromParcel(Parcel in) {
+      return new Tag(in.readString());
+    }
+
+    @Override
+    public Tag[] newArray(int size) {
+      return new Tag[size];
+    }
+  };
 
   /**
    * The minimum number of characters each tag must have.
@@ -110,6 +124,16 @@ public class Tag implements Serializable {
   @NonNull
   public Tag generateSubTag(@NonNull String content) {
     return new Tag(content, this);
+  }
+
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    dest.writeString(mContent);
   }
 
   @Override

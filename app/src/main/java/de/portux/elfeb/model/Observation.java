@@ -1,7 +1,7 @@
 package de.portux.elfeb.model;
 
-import android.location.Location;
-import android.location.LocationManager;
+import android.os.Parcel;
+import android.os.Parcelable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 
@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import de.portux.elfeb.model.Attachment.AttachmentType;
 import de.portux.elfeb.support.Assert;
 import de.portux.elfeb.support.CollectionModificationException;
+import de.portux.elfeb.support.ParcelableDate;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
@@ -29,7 +30,23 @@ import javax.annotation.Nonnull;
  * @author Rico Bergmann
  */
 @Entity(tableName = "observations", primaryKeys = {"time", "suspicion"})
-public class Observation implements Serializable {
+public class Observation implements Parcelable {
+
+  public static final Creator<Observation> CREATOR = new Creator<Observation>() {
+    @Override
+    public Observation createFromParcel(Parcel in) {
+      return new Observation(in);
+    }
+
+    @Override
+    public Observation[] newArray(int size) {
+      return new Observation[size];
+    }
+  };
+
+  public static Observation noticeNew(String suspicion, String comment) {
+    return new Observation(suspicion, comment);
+  }
 
   @NonNull
   @ColumnInfo(name = "time")
@@ -69,8 +86,24 @@ public class Observation implements Serializable {
   @Ignore
   private boolean mCompletelyInflated = false;
 
-  public static Observation noticeNew(String suspicion, String comment) {
-    return new Observation(suspicion, comment);
+  protected Observation(Parcel in) {
+    mTime = new Date(in.readLong());
+    mSuspicion = in.readString();
+    mComment = in.readString();
+    mDetermined = in.readByte() != 0;
+    mImageAttached = in.readByte() != 0;
+    mRecordingAttached = in.readByte() != 0;
+    if (in.readByte() == 0) {
+      mLocationLatitude = null;
+    } else {
+      mLocationLatitude = in.readDouble();
+    }
+    if (in.readByte() == 0) {
+      mLocationLongitude = null;
+    } else {
+      mLocationLongitude = in.readDouble();
+    }
+    mCompletelyInflated = in.readByte() != 0;
   }
 
   protected Observation(@NonNull String suspicion, @NonNull String comment) {
@@ -292,6 +325,34 @@ public class Observation implements Serializable {
     Assert.noNullElements(tags, "No tag may be null");
     this.mTags = tags;
     this.mCompletelyInflated = true;
+  }
+
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    dest.writeLong(mTime.getTime());
+    dest.writeString(mSuspicion);
+    dest.writeString(mComment);
+    dest.writeByte((byte) (mDetermined ? 1 : 0));
+    dest.writeByte((byte) (mImageAttached ? 1 : 0));
+    dest.writeByte((byte) (mRecordingAttached ? 1 : 0));
+    if (mLocationLatitude == null) {
+      dest.writeByte((byte) 0);
+    } else {
+      dest.writeByte((byte) 1);
+      dest.writeDouble(mLocationLatitude);
+    }
+    if (mLocationLongitude == null) {
+      dest.writeByte((byte) 0);
+    } else {
+      dest.writeByte((byte) 1);
+      dest.writeDouble(mLocationLongitude);
+    }
+    dest.writeByte((byte) (mCompletelyInflated ? 1 : 0));
   }
 
   @Override

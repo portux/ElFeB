@@ -116,7 +116,7 @@ public class ObservationDetailsFragment extends Fragment {
       mLocationText.setText(getString(R.string.location_coords, observation.getLocationLatitude(), observation.getLocationLongitude()));
     }
 
-    getArguments().putSerializable("obs", observation);
+    getArguments().putParcelable("obs", observation);
   }
 
   private void tagObservationWith(String content) {
