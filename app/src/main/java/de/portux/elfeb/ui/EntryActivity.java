@@ -24,11 +24,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import de.portux.elfeb.BuildConfig;
 import de.portux.elfeb.R;
 import de.portux.elfeb.model.Attachment;
 import de.portux.elfeb.model.GPSPosition;
@@ -207,6 +209,11 @@ public class EntryActivity extends AppCompatActivity {
     bindToLocationService();
   }
 
+  private void bindToLocationService() {
+    Intent locationService = new Intent(this, LocationService.class);
+    bindService(locationService, mLocationServiceConnection, Context.BIND_AUTO_CREATE);
+  }
+
   @Override
   protected void onResume() {
     super.onResume();
@@ -271,6 +278,7 @@ public class EntryActivity extends AppCompatActivity {
           mAudioAttachment = null;
         } else {
           mAudioAttachment = data.getData();
+          mSaveObservation.setEnabled(true);
           mRecordAudioButton.hide();
 
           // if a recording was attached we will also allow observations with no suspicion
@@ -370,7 +378,9 @@ public class EntryActivity extends AppCompatActivity {
     }
 
     if (mAudioAttachment != null) {
+      Log.d(TAG, "Attachment: " + mAudioAttachment);
       File audioFile = mAudioStorageService.convertUriToFile(this, mAudioAttachment);
+      Log.d(TAG, "File: " + audioFile);
       result.attach(Attachment.forAudio(audioFile, result));
     }
 
