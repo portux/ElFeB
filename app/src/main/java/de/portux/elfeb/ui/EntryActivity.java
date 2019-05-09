@@ -24,13 +24,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import de.portux.elfeb.BuildConfig;
 import de.portux.elfeb.R;
 import de.portux.elfeb.model.Attachment;
 import de.portux.elfeb.model.GPSPosition;
@@ -42,12 +40,75 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * The {@code EntryActivity} enables the creation of new observations and adds them to the
+ * fieldnotes.
+ * <p>
+ * To each observation up to one image or audio attachment may be added. Furthermore the observation
+ * may be tagged with an arbitrary number of existing tags.
+ * <p>
+ * This activity may be supplied with a number of options through the calling intent. These options
+ * are:
+ * <ul>
+ * <li>{@link #INTENT_EXTRA_CALLEE} - to indicate where the intent came from - we may try to set up
+ * Up-Navigation if it was created from another Activity within this App. Values should mostly be
+ * the {@code TAG}s of the calling components.</li>
+ * <li>{@link #INTENT_EXTRA_ATTACH_IMMEDIATELY} - to instantly hand over control to the services
+ * which take care of  creating the attachments. Possible values are {@link #ATTACH_IMAGE} or {@link
+ * #ATTACH_AUDIO}.
+ * </li>
+ * </ul>
+ * <p>
+ * When an {@link Observation} was created successfully its timestamp (identified through {@link
+ * #INTENT_EXTRA_OBS_DATE}) and suspicion (identified through {@link #INTENT_EXTRA_OBS_SUSPICION})
+ * will be added to the resulting intent.
+ *
+ * @author Rico Bergmann
+ * @see Observation
+ */
 public class EntryActivity extends AppCompatActivity {
 
-  public static final String CALLEE = "callee";
-  public static final String ATTACH_IMMEDIATELY = "instant_action";
+  /**
+   * Intent extra to identify the component that started {@code this} Activity.
+   */
+  public static final String INTENT_EXTRA_CALLEE = "callee";
+
+  /**
+   * Intent extra to specify an Attachment type that should be added to the new {@link Observation}
+   * immediately.
+   * <p>
+   * Possible values are {@link #ATTACH_IMAGE} or {@link #ATTACH_AUDIO} (or {@code null} to indicate
+   * the absence of such a command).
+   *
+   * @see Attachment
+   */
+  public static final String INTENT_EXTRA_ATTACH_IMMEDIATELY = "instant_action";
+
+  /**
+   * Indicates that when {@code this} Activity is started it should prepare to capture an image of
+   * the new observation immediately. This is useful if the image has to be taken quickly and the
+   * extra click can therefore be omitted.
+   */
   public static final String ATTACH_IMAGE = "capture_image";
+
+  /**
+   * Indicates that when {@code this} Activity is started it should prepare to record an audio
+   * sample of the new observation immediately. This is useful if the audio sample has to be taken
+   * quickly and the extra click can therefore be omitted.
+   */
   public static final String ATTACH_AUDIO = "record_audio";
+
+  /**
+   * Intent extra to specify the date of the observation that has just been created. This will be
+   * present in the resulting intent handed over to the callee.
+   */
+  public static final String INTENT_EXTRA_OBS_DATE = "obsDate";
+
+  /**
+   * Intent extra to specify the suspicion of the observation that has just been created. This will
+   * be present in the resulting intent handed over to the callee.
+   */
+  public static final String INTENT_EXTRA_OBS_SUSPICION = "obsSuspicion";
 
   private static final String TAG = EntryActivity.class.getSimpleName();
   private static final int RQ_CAPTURE_IMAGE = 111;
@@ -93,6 +154,10 @@ public class EntryActivity extends AppCompatActivity {
       getSupportActionBar().setDisplayHomeAsUpEnabled(false);
     }
 
+    if (savedInstanceState != null) {
+      mImageAttachment = (File) savedInstanceState.getSerializable("mImageAttachment");
+    }
+
     // set-up all controls
 
     mSuspicion = findViewById(R.id.edit_suspicion);
@@ -131,28 +196,33 @@ public class EntryActivity extends AppCompatActivity {
   protected void onStart() {
     super.onStart();
 
-    if (VERSION.SDK_INT >= 23) {
+    // we will try to connect to the location service to provide us with GPS data
+
+    if (VERSION.SDK_INT >= 23
+        && checkSelfPermission(permission.ACCESS_FINE_LOCATION)
+        != PackageManager.PERMISSION_GRANTED) {
       requestPermissions(new String[]{permission.ACCESS_FINE_LOCATION}, RQ_LOCATION_PERMISSION);
       return;
     }
     bindToLocationService();
   }
 
-  private void bindToLocationService() {
-    Intent locationService = new Intent(this, LocationService.class);
-    bindService(locationService, mLocationServiceConnection, Context.BIND_AUTO_CREATE);
-  }
-
   @Override
   protected void onResume() {
     super.onResume();
+    Log.d(TAG, "onResume");
+
+    // if necessary we will start the 'take photo' or 'record audio' immediate actions here
+
     if (!mImmediateActionsProcessed.get()) {
-      String immediateAttachment = mCallee.getStringExtra(ATTACH_IMMEDIATELY);
+      String immediateAttachment = mCallee.getStringExtra(INTENT_EXTRA_ATTACH_IMMEDIATELY);
       if (immediateAttachment != null && immediateAttachment.equals(ATTACH_IMAGE)) {
         doCaptureImage();
       } else if (immediateAttachment != null && immediateAttachment.equals(ATTACH_AUDIO)) {
         doRecordAudio();
       }
+
+      // no matter if we did execute an action, we at least processed whether there was one
       mImmediateActionsProcessed.set(true);
     }
   }
@@ -170,10 +240,29 @@ public class EntryActivity extends AppCompatActivity {
 
     switch (requestCode) {
       case RQ_CAPTURE_IMAGE:
+        // the mImageAttachment member was set before calling the camera App. Thus we only need
+        // to clean up if necessary.
         if (resultCode != RESULT_OK) {
           mImageAttachment = null;
+          Log.e(TAG, "Error while taking image");
         } else {
           mCaptureImageButton.hide();
+
+          if (data != null && data.getData() != null) {
+            final Uri actualUri = data.getData();
+            final Uri expectedUri = StorageService.resolveUriFor(mImageAttachment, this);
+            if (!actualUri.equals(expectedUri)) {
+              String logMsg = String
+                  .format("Expected URI %s does not match actual URI %s", expectedUri.getPath(),
+                      actualUri.getPath());
+              Log.d(TAG, logMsg);
+              mImageAttachment = new File(actualUri.getPath());
+            }
+          }
+
+          sendImageToGalleries();
+
+          // if an image was attached we will also allow observations with no suspicion
           mSaveObservation.setEnabled(true);
         }
         break;
@@ -182,18 +271,23 @@ public class EntryActivity extends AppCompatActivity {
           mAudioAttachment = null;
         } else {
           mAudioAttachment = data.getData();
-          mSaveObservation.setEnabled(true);
           mRecordAudioButton.hide();
+
+          // if a recording was attached we will also allow observations with no suspicion
+          mSaveObservation.setEnabled(true);
         }
         break;
     }
-
   }
 
   @Override
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
       @NonNull int[] grantResults) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+    // the workflow is the same for all permission requests: if the request was successful we will
+    // continue with the action that was interrupted by the request. Otherwise the request will just
+    // be dropped
 
     switch (requestCode) {
       case RQ_LOCATION_PERMISSION:
@@ -221,6 +315,42 @@ public class EntryActivity extends AppCompatActivity {
 
   }
 
+  @Override
+  protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    super.onRestoreInstanceState(savedInstanceState);
+  }
+
+  @Override
+  protected void onSaveInstanceState(Bundle outState) {
+    outState.putSerializable("mImageAttachment", mImageAttachment);
+    super.onSaveInstanceState(outState);
+  }
+
+  /**
+   * Initiates the connection to the {@link LocationService}.
+   */
+  private void bindToLocationService() {
+    Intent locationService = new Intent(this, LocationService.class);
+    bindService(locationService, mLocationServiceConnection, Context.BIND_AUTO_CREATE);
+  }
+
+  /**
+   * Sends an intent to notify all apps about the current image file.
+   */
+  private void sendImageToGalleries() {
+    if (mImageAttachment != null) {
+      Log.d(TAG, "Sending image to galleries: " + mImageAttachment);
+      Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+      Uri imageUri = StorageService.resolveUriFor(mImageAttachment, this);
+      mediaScanIntent.setData(imageUri);
+      sendBroadcast(mediaScanIntent);
+    }
+  }
+
+  /**
+   * Extracts the current values of the inputs and creates the corresponding {@link Observation}
+   * instance.
+   */
   private Observation buildObservation() {
     Observation result = Observation
         .noticeNew(mSuspicion.getText().toString(), mDescription.getText().toString());
@@ -240,33 +370,47 @@ public class EntryActivity extends AppCompatActivity {
     }
 
     if (mAudioAttachment != null) {
-      Log.d(TAG, "Attachment: " + mAudioAttachment);
       File audioFile = mAudioStorageService.convertUriToFile(this, mAudioAttachment);
-      Log.d(TAG, "File: " + audioFile);
       result.attach(Attachment.forAudio(audioFile, result));
     }
 
     return result;
   }
 
+  /**
+   * Creates the observation instance and finishes the activity with the correct result.
+   */
   private void finishNewEntry() {
     Observation observation = buildObservation();
     mObservationViewModel.insert(observation);
     Intent res = new Intent();
-    res.putExtra("obsDate", observation.getTime());
-    res.putExtra("obsSuspicion", observation.getSuspicion());
+    res.putExtra(INTENT_EXTRA_OBS_DATE, observation.getTime());
+    res.putExtra(INTENT_EXTRA_OBS_SUSPICION, observation.getSuspicion());
     setResult(RESULT_OK, res);
     finish();
   }
 
+  /**
+   * Safely calls the camera App to take a photo of the observation. If the necessary permissions
+   * have not been granted, they will be requested.
+   *
+   * @see #callCaptureImageApp()
+   */
   private void doCaptureImage() {
-    if (VERSION.SDK_INT >= 23) {
-      requestPermissions(new String[]{permission.WRITE_EXTERNAL_STORAGE}, RQ_CAPTURE_IMAGE_STORAGE_PERMISSION);
+    if (VERSION.SDK_INT >= 23
+        && checkSelfPermission(permission.WRITE_EXTERNAL_STORAGE)
+        != PackageManager.PERMISSION_GRANTED) {
+      requestPermissions(new String[]{permission.WRITE_EXTERNAL_STORAGE},
+          RQ_CAPTURE_IMAGE_STORAGE_PERMISSION);
       return;
     }
     callCaptureImageApp();
   }
 
+  /**
+   * Actually calls the camera App to take a photo of the observation, assuming that all permissions
+   * have been granted.
+   */
   private void callCaptureImageApp() {
     Intent captureImageIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     if (captureImageIntent.resolveActivity(getPackageManager()) != null) {
@@ -274,15 +418,23 @@ public class EntryActivity extends AppCompatActivity {
           ? mLocationService.getCurrentLocationAsGPSPosition() //
           : null;
       File imageFile = mImageStorageService.createImageFile(currentPosition);
-      Uri imageUri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", imageFile);
+      Uri imageUri = StorageService.resolveUriFor(imageFile, this);
       captureImageIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
       startActivityForResult(captureImageIntent, RQ_CAPTURE_IMAGE);
       mImageAttachment = imageFile;
     }
   }
 
+  /**
+   * Safely calls the recorder App to add an audio attachment to the observation. If the necessary
+   * permissions have not been granted, they will be requested.
+   *
+   * @see #callRecordAudioApp()
+   */
   private void doRecordAudio() {
-    if (VERSION.SDK_INT >= 23) {
+    if (VERSION.SDK_INT >= 23 && (checkSelfPermission(permission.WRITE_EXTERNAL_STORAGE)
+        != PackageManager.PERMISSION_GRANTED
+        || checkSelfPermission(permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)) {
       requestPermissions(new String[]{permission.WRITE_EXTERNAL_STORAGE, permission.RECORD_AUDIO},
           RQ_RECORD_AUDIO_PERMISSIONS);
       return;
@@ -290,17 +442,25 @@ public class EntryActivity extends AppCompatActivity {
     callRecordAudioApp();
   }
 
+  /**
+   * Actually calls the recorder App, assuming that all permission have been granted.
+   */
   private void callRecordAudioApp() {
     Intent recordAudioIntent = new Intent(Media.RECORD_SOUND_ACTION);
     if (recordAudioIntent.resolveActivity(getPackageManager()) != null) {
       startActivityForResult(recordAudioIntent, RQ_RECORD_AUDIO);
     } else {
+      // many audio recorders do not set-up their intent filters correctly, thus the intent
+      // may easily not be resolvable
       Log.e(TAG, "No audio recorder found");
       mRecordAudioButton.hide();
       Toast.makeText(this, R.string.no_recording_app, Toast.LENGTH_SHORT).show();
     }
   }
 
+  /**
+   * Connection to the {@link LocationService} which takes care of the whole connection management.
+   */
   private final ServiceConnection mLocationServiceConnection = new ServiceConnection() {
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
@@ -315,8 +475,17 @@ public class EntryActivity extends AppCompatActivity {
       Log.d(TAG, "LocationService disconnected");
       mLocationServiceBound = false;
     }
+
+    @Override
+    public String toString() {
+      return "LocationServiceConntection: " + super.toString();
+    }
   };
 
+  /**
+   * Listener to disable the 'save observation' button if the suspicion is empty and no attachments
+   * have been provided.
+   */
   private final TextWatcher disableSaveObservationIfNoSuspicion = new TextWatcher() {
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -330,24 +499,27 @@ public class EntryActivity extends AppCompatActivity {
 
     @Override
     public void afterTextChanged(Editable s) {
-      mSaveObservation.setEnabled(!s.toString().isEmpty() || mImageAttachment != null || mAudioAttachment != null);
+      mSaveObservation.setEnabled(
+          !s.toString().isEmpty() || mImageAttachment != null || mAudioAttachment != null);
     }
   };
 
-  private final OnClickListener captureImage = new OnClickListener() {
-    @Override
-    public void onClick(View v) {
-      doCaptureImage();
-    }
-  };
+  /**
+   * Listener to run the image capture logic if the capture button has been clicked.
+   */
+  private final OnClickListener captureImage = __ -> doCaptureImage();
 
-  private final OnClickListener recordAudio = new OnClickListener() {
-    @Override
-    public void onClick(View v) {
-      doRecordAudio();
-    }
-  };
+  /**
+   * Listener to run the audio recording logic if the record button has been clicked.
+   */
+  private final OnClickListener recordAudio = __ -> doRecordAudio();
 
+  /**
+   * Observer to propagate the tags that were loaded by the {@link TagViewModel} to the tag
+   * selection recycler.
+   *
+   * @see TagSelectionAdapter
+   */
   private class SelectionAdapterTagInitializer implements Observer<List<Tag>> {
 
     @Override
@@ -356,6 +528,9 @@ public class EntryActivity extends AppCompatActivity {
     }
   }
 
+  /**
+   * Listener to run the save observation logic when the corresponding button has been clicked.
+   */
   private class SaveNewObservationClickListener implements OnClickListener {
 
     @Override
@@ -376,5 +551,4 @@ public class EntryActivity extends AppCompatActivity {
       }
     }
   }
-
 }

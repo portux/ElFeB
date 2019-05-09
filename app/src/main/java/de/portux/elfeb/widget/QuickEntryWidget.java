@@ -71,10 +71,10 @@ public class QuickEntryWidget extends AppWidgetProvider {
     }
 
     Intent entryWithAudio = new Intent(context, EntryActivity.class);
-    entryWithAudio.putExtra(EntryActivity.ATTACH_IMMEDIATELY, EntryActivity.ATTACH_AUDIO);
+    entryWithAudio.putExtra(EntryActivity.INTENT_EXTRA_ATTACH_IMMEDIATELY, EntryActivity.ATTACH_AUDIO);
     PendingIntent entryWithAudioPendingIntent = PendingIntent.getActivity(context, RQ_AUDIO_ENTRY, entryWithAudio, PendingIntent.FLAG_UPDATE_CURRENT);
     Intent entryWithImage = new Intent(context, EntryActivity.class);
-    entryWithImage.putExtra(EntryActivity.ATTACH_IMMEDIATELY, EntryActivity.ATTACH_IMAGE);
+    entryWithImage.putExtra(EntryActivity.INTENT_EXTRA_ATTACH_IMMEDIATELY, EntryActivity.ATTACH_IMAGE);
     PendingIntent entryWithImagePendingIntent = PendingIntent.getActivity(context, RQ_IMAGE_ENTRY, entryWithImage, PendingIntent.FLAG_UPDATE_CURRENT);
     Intent simpleEntry = new Intent(context, EntryActivity.class);
     PendingIntent simpleEntryPendingIntent = PendingIntent.getActivity(context, RQ_NEW_ENTRY, simpleEntry, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -83,12 +83,12 @@ public class QuickEntryWidget extends AppWidgetProvider {
 
     switch (rows) {
       case 4:   // audio + image + default + icon
-        entryWithAudio.putExtra(EntryActivity.ATTACH_IMMEDIATELY, EntryActivity.ATTACH_AUDIO);
+        entryWithAudio.putExtra(EntryActivity.INTENT_EXTRA_ATTACH_IMMEDIATELY, EntryActivity.ATTACH_AUDIO);
         remoteViews.setOnClickPendingIntent(R.id.widget_add_audio, entryWithAudioPendingIntent);
         remoteViews.setImageViewResource(R.id.widget_add_audio, R.drawable.ic_mic_white_48dp);
         // fall through
       case 3:   // image + default + icon
-        entryWithImage.putExtra(EntryActivity.ATTACH_IMMEDIATELY, EntryActivity.ATTACH_IMAGE);
+        entryWithImage.putExtra(EntryActivity.INTENT_EXTRA_ATTACH_IMMEDIATELY, EntryActivity.ATTACH_IMAGE);
         remoteViews.setOnClickPendingIntent(R.id.widget_add_photo, entryWithImagePendingIntent);
         remoteViews.setImageViewResource(R.id.widget_add_photo, R.drawable.ic_add_a_photo_white_48dp);
         // fall through

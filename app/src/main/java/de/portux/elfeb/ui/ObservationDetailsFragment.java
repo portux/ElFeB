@@ -126,6 +126,9 @@ public class ObservationDetailsFragment extends Fragment {
   }
 
   private void showCreateTagDialog() {
+
+    // FIXME disable add button if text is empty
+
     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
     builder.setTitle(R.string.action_add_tag);
     final EditText input = new EditText(getContext());

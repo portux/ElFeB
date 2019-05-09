@@ -45,6 +45,10 @@ public class Assert {
     }
   }
 
+  public static void containsExactlyNItems(Object[] arr, int n, String message) {
+    isTrue(arr.length == n, message);
+  }
+
   /**
    * Throws an {@link IllegalArgumentException} with a dedicated message.
    */
