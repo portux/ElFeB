@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class EntryActivity extends AppCompatActivity {
 
-  public static final String CALLEE = "callee";
+  public static final String INTENT_EXTRA_CALLEE = "callee";
   public static final String ATTACH_IMMEDIATELY = "instant_action";
   public static final String ATTACH_IMAGE = "capture_image";
   public static final String ATTACH_AUDIO = "record_audio";

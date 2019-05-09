@@ -1,9 +1,6 @@
 package de.portux.elfeb.ui;
 
 import android.content.Intent;
-import android.util.Log;
-import android.view.View.OnClickListener;
-import android.widget.TextView;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.paging.PagedList;
@@ -44,7 +41,7 @@ public class OverviewActivity extends AppCompatActivity {
 
   private final View.OnClickListener  createEntry = view -> {
       Intent createEntry = new Intent(OverviewActivity.this, EntryActivity.class);
-      createEntry.putExtra(EntryActivity.CALLEE, TAG);
+      createEntry.putExtra(EntryActivity.INTENT_EXTRA_CALLEE, TAG);
       startActivity(createEntry);
   };
 
